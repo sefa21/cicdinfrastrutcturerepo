@@ -1,0 +1,28 @@
+name: "Terraform Apply"
+
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Terraform Plan'
+  inputs:
+    buildType: specific
+    buildVersionToDownload: 'latest'
+    project: 'TFYAML' # replace with the name of your Azure DevOps Project
+    definition: 'Terraform Plan'
+    artifactName: 'terraformPlan'
+    path: '$(Pipeline.Workspace)'
+
+- task: TerraformInstaller@0
+  displayName: "Install Terraform"
+  inputs:
+    terraformVersion: '1.3.9'
+    terraformDownloadLocation: 'https://releases.hashicorp.com/terraform'
+
+- script: |
+    terraform init
+    terraform apply $(Pipeline.Workspace)/terraform.tfplan
+  displayName: 'Terraform Apply'
